@@ -33,6 +33,12 @@ public abstract class GameLogic {
     private static int[][] board= new int[ROWS][COLS];
 
     public GameLogic() {}
+    
+    /**
+    * The method initialises the pentominos on the board.
+    * @param no parameters.
+    * @return boolean.
+    */
 
     public boolean init() {
         if(pentos[0]==null){
@@ -53,27 +59,63 @@ public abstract class GameLogic {
         Gdx.input.setInputProcessor(pentomino);
         return true;
     }
+    
+    /**
+    * The method displays the next pentomino after the previous one has reached the bottom.
+    * @param no parameters.
+    * @return int[].
+    */
 
     public int[] displayNext() {
         return pentos[1].getPiece();
     }
+    
+    /**
+    * The method calculates the score for each fall of a pentomino.
+    * @param "n".
+    * @return nothing.
+    */
+    
     public void addScore(int n){
         highscore+=n*(n*100);
     }
+    /** This method returns/displays the score/high score.
+    * @param no parameters.
+    * @return int (highscore).
+    */
+    
     public int getScore(){
         return highscore;
     }
+    /** This method removes a pentomino from its previous position (to be shifted further down).
+    * @param no parameters.
+    * @return nothing.
+    */
 
     public void remove() {
         pentomino.removePosition();
     }
+    /** This method checks whether a given pentomino can be shifted down (if the spaces below it are unoccupied.)
+    * @param no parameters.
+    * @return true (boolean) if the piece can move down.
+    */
 
     public boolean getRun(){
         return run;
     }
+    /** This method shifts the pentomino down if it's possible to do so.
+    * @param "run".
+    * @ return nothing.
+    */
+    
     public void setRun(boolean run){
         this.run=run;
     }
+    /** 
+    * This method resets the game when it's over or when the user chooses to do so.
+    * @param no parameters.
+    * @return nothing.
+    */
 
     public void reset() {
         highscore=0;
@@ -84,29 +126,55 @@ public abstract class GameLogic {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         game.setScreen(new GameScreen(game));
     }
+    /** This method predicts where the piece is gonna land after its fall.
+    * @param no parameters.
+    * @return nothing.
+    */
 
     public void aimDrop() {
         pentomino.aimDrop();
         pentomino.drawAim();
     }
+    /** This method shifts the pentomino left.
+    * @param no parameters.
+    * @return nothing.
+    */
 
 
-    public void moveRight() {
+    public void moveLeft() {
         pentomino.movePentominoLeft();
         aimDrop();
     }
+    /** This method shifts the pentomino right.
+    * @param no parameters.
+    * @return nothing.
+    */
 
-    public void moveLeft() {
+    public void moveRight() {
         pentomino.movePentominoRight();
         aimDrop();
     }
+    /** This method checks whether the pentomino does indeed fall down.
+    * @param no parameters.
+    * @return true(boolean) if the pentomino falls.
+    */
 
     public boolean fall() {
         return pentomino.fall();
     }
+    /** This method gets the board and displays it.
+    * @param no parameters.
+    * @return board(int[][])
+    */
+    
     public int[][] getBoard(){
         return board;
     }
+    /** This method gets all the clumps, i.e, all the pentominoes which are stuck to each other without gaps.
+    * @param no parameters.
+    * @return the list of clumps(int[][]).
+    */
+    
     public int[][] getClumps(){
         return listOfClumps;
     }
@@ -116,6 +184,7 @@ public abstract class GameLogic {
      (@param r: the current row of the board
      @param: the current column of the board)?
      */
+    
     public void checkFullLines(){
         removeLines();
         if(fullLines>0){
@@ -129,6 +198,10 @@ public abstract class GameLogic {
         if(fullLines>0)
             checkFullLines();
     }
+    /** Deletes the rows which are filled so that the pentomino can fall down.
+    * @param no parameters.
+    * @return nothing.
+    */
 
     public void removeLines(){
         int cellsFull;
@@ -146,6 +219,11 @@ public abstract class GameLogic {
             }r--; //next check row above
         }while(cellsFull!=0 && r>=0); //break when a row is complete empty: no full row can come above
     }
+    /**
+    * Checks how each of the pentomino clumps can fall down.
+    * @param array list(int)
+    * @return nothing.
+    */
 
     public void realisticFall(ArrayList<Integer> possibleClumps) {
         if(possibleClumps.size()>0){
@@ -184,6 +262,11 @@ public abstract class GameLogic {
             realisticFall(newPossible);
         }
     }
+    /**
+    * Identifies all of the pentomino clumps.
+    * @param no parameters.
+    * @return nothing.
+    */
 
     public void identifyClumps() {
         clumpNumber=0;
@@ -195,6 +278,11 @@ public abstract class GameLogic {
                         ++clumpNumber;
                         identifyClump(j,i,clumpNumber);}
     }
+    /**
+    * Identifies each individual clump.
+    * @param (columns, rows, pentomino piece).
+    * @return nothing.
+    */
 
     private void identifyClump(int col,int row,int piece) {
         if(row>=0 && row<ROWS && col>=0 && col<COLS){
@@ -213,6 +301,11 @@ public abstract class GameLogic {
         else
             return;
     }
+    /**
+    * Checks whether a pentomino clump exists.
+    * @param (int i, int j).
+    * @return true(boolean) if there exists a pentomino clump.
+    */
 
     private boolean inClumps(int i,int j) {
         if(listOfClumps[i][j]>0)
@@ -235,10 +328,20 @@ public abstract class GameLogic {
                     board[r][c]=board[r-1][c]; //replace row with row above
             }
     }
+    /**
+    * Gets and returns the lines on the board which are full.
+    * @param no parameters.
+    * @return all the lines which are full(int).
+    */
 
     public int getFullLines(){
         return fullLines;
     }
+    /**
+    * Converts an integer into a string.
+    * @param int x.
+    * @return String.
+    */
 
     public String toString(int x){
         return ""+x;
