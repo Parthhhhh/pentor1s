@@ -6,22 +6,22 @@ import static com.group4.Constants.rotations;
  * Created by Tobias on 01/12/2017.
  */
 
-public class Bot extends GameLogic{
+public class OptimalMove extends GameLogic{
     private Pentomino pentomino;
     private double pentominoHeight=0;
-    private int[] boardEvaluation=new int[4];
+    private int[] boardEvaluation=new int[5];
     private double maxEvalValue=0;
     private double evalValue;
     private int dropHeight;
-    private int heightWeight=1000;
-    private int clearsWeight=800;
-    private int connectionsWeight=20;
+    private int heightWeight=800;
+    private int clearsWeight=1200;
+    private int connectionsWeight=400;
     private int touchGroundWeight=500;
-    private int holesWeight=-10;
+    private int holesWeight=-200;
     private int bestRotation;
     private int bestPosition;
 
-    public Bot (Pentomino pentomino){
+    public OptimalMove(Pentomino pentomino){
         this.pentomino=pentomino;
     }
 

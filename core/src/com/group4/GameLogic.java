@@ -21,6 +21,7 @@ public abstract class GameLogic {
     private Pentomino pentomino1;
     private int r;
     private int p;
+    private double[][] weights;
     private Pentomino pentomino2;
     private Pentomino pentomino;
     private boolean run=false;
@@ -31,24 +32,27 @@ public abstract class GameLogic {
     private static int clumpNumber;
     private static int fullLines;
     private static int[][] board= new int[ROWS][COLS];
+    private static int totalPentominos;
+    private static int totalGames;
+    private static boolean pause;
+
 
     public GameLogic() {}
 
     /**
      * The method initialises the pentomino on the board.
-     * @param no parameters.
      * @return boolean.
      */
 
     public boolean init() {
         if(pentos[0]==null){
-            p=(int) (Math.random()*11);
+            p=(int) (Math.random()*12);
             pentos[0]=pentomino1=new Pentomino(p,0);
             p=(int) (Math.random()*11);
             pentos[1]=pentomino2=new Pentomino(p,0);}
         else{
             pentos[0]=pentos[1];
-            p=(int) (Math.random()*11);
+            p=(int) (Math.random()*12);
             pentos[1]=pentomino1=new Pentomino(p,0);
         }
         pentomino=pentos[0];
@@ -56,15 +60,25 @@ public abstract class GameLogic {
             return false;
         aimDrop();
         board=pentomino.getBoard();
-        SimpleBot bot=new SimpleBot(pentomino);
-        bot.playBot();
+        totalPentominos++;
         Gdx.input.setInputProcessor(pentomino);
         return true;
     }
 
+    public void setWeights(double[][] weights){
+        this.weights=weights;
+    }
+
+    /**
+     * Returns the total number of pentominos on the board.
+     * @return int.
+     */
+    public int getTotalPentominos(){
+        return totalPentominos;
+    }
+
     /**
      * Getter to display the next Pentomino on the right side of the screen.
-     * @param no parameters.
      * @return int[].
      */
 
@@ -82,7 +96,6 @@ public abstract class GameLogic {
     }
 
     /** This method returns/displays the score.
-     * @param no parameters.
      * @return int (highscore).
      */
     public int getScore(){
@@ -90,7 +103,6 @@ public abstract class GameLogic {
     }
 
     /** This method resets the score to zero.
-     * @param no parameters.
      * @return int (highscore).
      */
     public void resetScore(){
@@ -98,7 +110,6 @@ public abstract class GameLogic {
     }
 
     /** This method removes a pentomino from its previous position (to be shifted further down).
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -106,7 +117,6 @@ public abstract class GameLogic {
         pentomino.removePosition();
     }
     /** This method checks whether a given pentomino can be shifted down (if the spaces below it are unoccupied.)
-     * @param no parameters.
      * @return true (boolean) if the piece can move down.
      */
 
@@ -123,12 +133,12 @@ public abstract class GameLogic {
     }
     /**
      * This method resets the game when it's over or when the user chooses to do so.
-     * @param no parameters.
      * @return nothing.
      */
 
     public void reset() {
         highscore=0;
+        totalPentominos=0;
         listOfClumps = new int[ROWS][COLS];
         pentos=new Pentomino[2];
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -137,7 +147,6 @@ public abstract class GameLogic {
     }
 
     /** This method predicts where the piece is gonna land after its fall.
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -147,7 +156,6 @@ public abstract class GameLogic {
     }
 
     /** This method makes the piece drop.
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -155,7 +163,6 @@ public abstract class GameLogic {
         pentomino.drop();
     }
     /** This method shifts the pentomino left.
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -165,7 +172,6 @@ public abstract class GameLogic {
         aimDrop();
     }
     /** This method shifts the pentomino right.
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -174,15 +180,13 @@ public abstract class GameLogic {
         aimDrop();
     }
     /** This method checks whether the pentomino does indeed fall down.
-     * @param no parameters.
      * @return true(boolean) if the pentomino falls.
      */
 
-    public boolean fall() {
+    public boolean fall(){
         return pentomino.fall();
     }
     /** This method gets the board and displays it.
-     * @param no parameters.
      * @return board(int[][])
      */
 
@@ -190,7 +194,6 @@ public abstract class GameLogic {
         return board;
     }
     /** This method gets all the clumps, i.e, all the pentominoes which are stuck to each other without gaps.
-     * @param no parameters.
      * @return the list of clumps(int[][]).
      */
 
@@ -218,7 +221,6 @@ public abstract class GameLogic {
             checkFullLines();
     }
     /** Deletes the rows which are filled so that the pentomino can fall down.
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -281,7 +283,6 @@ public abstract class GameLogic {
     }
     /**
      * Identifies all of the pentomino clumps.
-     * @param no parameters.
      * @return nothing.
      */
 
@@ -297,7 +298,7 @@ public abstract class GameLogic {
     }
     /**
      * Identifies each individual clump.
-     * @param (columns, rows, pentomino piece).
+     * @param (col, rows, pentomino piece).
      * @return nothing.
      */
 
@@ -320,7 +321,7 @@ public abstract class GameLogic {
     }
     /**
      * Checks whether a pentomino clump exists.
-     * @param (int i, int j).
+     * @param (i, j).
      * @return true(boolean) if there exists a pentomino clump.
      */
 
@@ -347,7 +348,6 @@ public abstract class GameLogic {
     }
     /**
      * Gets and returns the lines on the board which are full.
-     * @param no parameters.
      * @return all the lines which are full(int).
      */
 
@@ -356,11 +356,28 @@ public abstract class GameLogic {
     }
     /**
      * Converts an integer into a string.
-     * @param int x.
+     * @param x .
      * @return String.
      */
 
     public String toString(int x){
         return ""+x;
+    }
+
+    public void increaseGameCount() {
+        totalGames++;
+    }
+    public void resetGameCount() {
+        totalGames=0;
+    }
+    public int getGameCount() {
+        return totalGames;
+    }
+
+    public void setPause(boolean b) {
+        this.pause=b;
+    }
+    public boolean getPause(){
+        return pause;
     }
 }

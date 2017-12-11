@@ -14,18 +14,19 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import static com.group4.Constants.COLS;
 import static com.group4.Constants.MARGIN;
 import static com.group4.Constants.ROWS;
-import static com.group4.Constants.TIMESPAN_NORMAL;
+import static com.group4.Constants.SIDE;
+import static com.group4.Constants.TIMESPAN_FAST;
+import static com.group4.Constants.WIDTH;
 
 /**
- * Created by Tobias on 08/11/2017.
+ * Created by Tobias on 07/12/2017.
  */
 
-public class GameScreen extends GameLogic implements Screen {
+public class TutorialScreen extends GameLogic implements Screen {
     public static TetrisGame game = null;
     ShapeRenderer renderer;
 
@@ -33,6 +34,7 @@ public class GameScreen extends GameLogic implements Screen {
     private long time;
     private Texture background;
     private SpriteBatch batch;
+    private Texture block;
     private Texture aimBlock;
     private int[] next;
     private Texture block1;
@@ -54,13 +56,8 @@ public class GameScreen extends GameLogic implements Screen {
     private Texture block11;
     private Texture block12;
     private HighScore highscore;
-    private FitViewport viewport;
-    private float height;
-    private float width;
-    private TextButton pauseButton;
-    private Texture pauseGraphic;
 
-    public GameScreen(TetrisGame game) {
+    public TutorialScreen(TetrisGame game) {
         this.game = game;
     }
     private void createBasicSkin(){
@@ -70,7 +67,7 @@ public class GameScreen extends GameLogic implements Screen {
         skin.add("default", font);
 
         //Create a texture
-        Pixmap pixmap = new Pixmap((int)Gdx.graphics.getWidth()/4,(int)Gdx.graphics.getHeight()/10, Pixmap.Format.RGB888);
+        Pixmap pixmap = new Pixmap((int) Gdx.graphics.getWidth()/4,(int)Gdx.graphics.getHeight()/10, Pixmap.Format.RGB888);
         pixmap.setColor(Color.BLACK);
         pixmap.fill();
         skin.add("background",new Texture(pixmap));
@@ -88,9 +85,7 @@ public class GameScreen extends GameLogic implements Screen {
 
     @Override
     public void show() {
-        height = ROWS*91f;
-        width=COLS*91f;
-        viewport = new FitViewport(10f, 10f);
+        super.init();
         board=super.getBoard();
         clumps=super.getClumps();
         background = new Texture(Gdx.files.internal("tetris_bg_main"+COLS+".png"));
@@ -107,7 +102,6 @@ public class GameScreen extends GameLogic implements Screen {
         block11 = new Texture(Gdx.files.internal("tetris_block11.png"));
         block12 = new Texture(Gdx.files.internal("tetris_block12.png"));
         aimBlock = new Texture(Gdx.files.internal("aim_block.png"));
-        pauseGraphic =new Texture(Gdx.files.internal("pause.png"));
         //aimBlock = new Texture(Gdx.files.internal("tetris_block_sinter.png")); christmas mode
         score1=new Texture(Gdx.files.internal("score_1.png"));
         highscore= new HighScore();
@@ -125,41 +119,19 @@ public class GameScreen extends GameLogic implements Screen {
             }
         });
         stage.addActor(newGameButton);
-        pauseButton = new TextButton("Pause", skin); // Use the initialized skin
-        pauseButton.setPosition(6*Gdx.graphics.getWidth()/10, 1*Gdx.graphics.getHeight()/6);
-        pauseButton.addListener(new ChangeListener() {
-            public void changed (ChangeEvent event, Actor actor) {
-                Gdx.app.exit();
-            }
-        });
-        stage.addActor(pauseButton);
-        super.init();
         super.setRun(true);
     }
 
     @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height, true);
-    }
+    public void resize(int width, int height) {}
 
     @Override
     public void dispose() {
         stage.dispose();
         skin.dispose();
         aimBlock.dispose();
+        block.dispose();
         block1.dispose();
-        block2.dispose();
-        block3.dispose();
-        block4.dispose();
-        block5.dispose();
-        block6.dispose();
-        block7.dispose();
-        block8.dispose();
-        block9.dispose();
-        block10.dispose();
-        block11.dispose();
-        block12.dispose();
-        pauseGraphic.dispose();
         background.dispose();
         batch.dispose();
         score1.dispose();
@@ -170,60 +142,41 @@ public class GameScreen extends GameLogic implements Screen {
 
     @Override
     public void render(float sth) {
-        if(!super.getPause()){
-            board = super.getBoard();
-            if (action()) {
-                viewport.apply();
-                renderer.setProjectionMatrix(viewport.getCamera().combined);
-                Gdx.gl.glClearColor(Constants.BACKGROUND_COLOR.r, Constants.BACKGROUND_COLOR.g, Constants.BACKGROUND_COLOR.b, 1);
-                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-                batch.begin();
-                batch.draw(background, 0, 0, width, height);
-                batch.end();
-                drawShape(height, width);
-                drawNext(height, width);
-                drawText(height, width);
-                if (super.getFullLines() > 0) {
-                    batch.begin();
-                    batch.draw(score1, width / 2 - 3 / 2 * (width / COLS), height / 2 - (height / ROWS), 3 * (width / COLS), 2 * (height / ROWS));
-                    batch.end();
+        if (super.getRun()){
+            int height = Gdx.graphics.getHeight();
+            int width=COLS*100*Gdx.graphics.getWidth()/(WIDTH+SIDE);
+            if (System.currentTimeMillis() - time >= TIMESPAN_FAST) {
+                if (!super.fall()) {
+                    super.checkFullLines();
+                    if (!super.init()){
+                        super.setRun(false);
+                    }
                 }
-                stage.act();
-                stage.draw();
-            } else {
-                game.setScreen(new GameOverScreen(game));
+                time = System.currentTimeMillis();
             }
-        }
-        else{
-            viewport.apply();
-            renderer.setProjectionMatrix(viewport.getCamera().combined);
             Gdx.gl.glClearColor(Constants.BACKGROUND_COLOR.r, Constants.BACKGROUND_COLOR.g, Constants.BACKGROUND_COLOR.b, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             batch.begin();
             batch.draw(background, 0, 0, width, height);
-            batch.draw(pauseGraphic, 0, height/2, width, 3*(height / ROWS));
             batch.end();
-            drawNext(height, width);
-            drawText(height, width);
+            drawShape(height,width);
+            drawNext(height,width);
+            drawText(height,width);
+            if (super.getFullLines() > 0) {
+                batch.begin();
+                batch.draw(score1, width / 2 - 3 / 2 * (width / COLS), height / 2 - (height / ROWS), 3 * (width / COLS), 2 * (height / ROWS));
+                batch.end();
+            }
             stage.act();
             stage.draw();
         }
-    }
-
-    public boolean action() {
-        if (System.currentTimeMillis() - time >= TIMESPAN_NORMAL) {
-            if (!super.fall()) {
-                super.checkFullLines();
-                if (!super.init()){
-                    return false;
-                }
-            }
-            time = System.currentTimeMillis();
+        else{
+            game.setScreen(new GameOverScreen(game));
+            //super.reset();
         }
-        return true;
     }
 
-    private void drawText(float height,float width) {
+    private void drawText(int height,int width) {
         batch.begin();
         font.setColor(Color.BLACK);
         font.getData().setScale(2f);
@@ -237,7 +190,7 @@ public class GameScreen extends GameLogic implements Screen {
         batch.end();
     }
 
-    private void drawNext(float height,float width) {
+    private void drawNext(int height,int width) {
         next=super.displayNext();
         batch.begin();
         switch (next[0]) {
@@ -310,10 +263,10 @@ public class GameScreen extends GameLogic implements Screen {
         batch.end();
     }
 
-    private void drawShape(float height,float width) {
+    private void drawShape(int height,int width) {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                if (board[i][j] > 0) {
+                if (board[i][j] != 0&& board[i][j] != -1) {
                     batch.begin();
                     switch (board[i][j]) {
                         case 1:  batch.draw(block1,j * (width / COLS), (ROWS-1-i) * (height / ROWS), (width / COLS), (height / ROWS));

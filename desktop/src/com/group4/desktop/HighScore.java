@@ -4,9 +4,6 @@ package com.group4;
  * Created by Tobias on 27/11/2017.
  */
 
-import com.group4.HighscoreScreen;
-import com.group4.TetrisGame;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

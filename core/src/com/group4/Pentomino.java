@@ -184,7 +184,7 @@ public class Pentomino extends GameLogic implements InputProcessor {
         maxRowPerColR=temp;
         removePosition();
         for(int i=1;i<rotatedPiece.length;i+=2)
-            if(board[row+rotatedPiece[i]][colR+rotatedPiece[i+1]]>0){
+            if(row+rotatedPiece[i]>=ROWS||board[row+rotatedPiece[i]][colR+rotatedPiece[i+1]]>0){
                 rotatedPiece=rotations[p][(r)%rotations[p].length];
                 drawPentomino();
                 return;}
@@ -235,11 +235,11 @@ public class Pentomino extends GameLogic implements InputProcessor {
         if (row >= ROWS || //if it is below the board
                 col-1+minCol< 0) //if it is to the left of the board
             return false;
-        for(int i=row;i<=maxRow+row;i++){
-            if(board[i][col-1+maxColPerRowLeft[i-row]]>0)
-                return false;
-        }
         removePosition();
+        for(int i=1;i<piece.length;i+=2)
+            if(board[piece[i]+row][piece[i+1]-1+col]>0){
+                drawPentomino();
+                return false;}
         col--;
         drawPentomino();
         return true;
@@ -249,11 +249,11 @@ public class Pentomino extends GameLogic implements InputProcessor {
         if (row >= ROWS || //if it is below the board
                 col+1+maxCol >= COLS) //if it is to the right of the board
             return false;
-        for(int i=row;i<=maxRow+row;i++){
-            if(board[i][col+1+maxColPerRowRight[i-row]]>0)
-                return false;
-        }
         removePosition();
+        for(int i=1;i<piece.length;i+=2)
+            if(board[piece[i]+row][piece[i+1]+1+col]>0){
+                drawPentomino();
+                return false;}
         col++;
         drawPentomino();
         return true;
@@ -281,32 +281,36 @@ public class Pentomino extends GameLogic implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode== Input.Keys.UP){
-            removeAim();
-            rotate();
-            aimDrop();
-            drawAim();
+        if(!super.getPause()) {
+            if (keycode == Input.Keys.UP) {
+                removeAim();
+                rotate();
+                aimDrop();
+                drawAim();
+            }
+            if (keycode == Input.Keys.LEFT) {
+                removeAim();
+                movePentominoLeft();
+                aimDrop();
+                drawAim();
+            }
+            if (keycode == Input.Keys.RIGHT) {
+                removeAim();
+                movePentominoRight();
+                aimDrop();
+                drawAim();
+            }
+            if (keycode == Input.Keys.SPACE) {
+                removePosition();
+                drop();
+            }
+            if (keycode == Input.Keys.R) {
+                resetPento();
+                super.reset();
+            }
+            return true;
         }
-        if (keycode== Input.Keys.LEFT){
-            removeAim();
-            movePentominoLeft();
-            aimDrop();
-            drawAim();}
-        if (keycode== Input.Keys.RIGHT){
-            removeAim();
-            movePentominoRight();
-            aimDrop();
-            drawAim();
-        }
-        if (keycode== Input.Keys.SPACE){
-            removePosition();
-            drop();
-        }
-        if (keycode== Input.Keys.R){
-            resetPento();
-            super.reset();
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -321,33 +325,49 @@ public class Pentomino extends GameLogic implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if(screenX>6*Gdx.graphics.getWidth()/10&&screenX<(6*Gdx.graphics.getWidth()/10+Gdx.graphics.getWidth()/4)&&screenY<2*Gdx.graphics.getHeight()/3&&screenY>(2*Gdx.graphics.getHeight()/3-Gdx.graphics.getHeight()/10)){
-            resetPento();
-            super.reset();
+        if(!super.getPause()){
+            if(screenX>6*Gdx.graphics.getWidth()/10&&screenX<(6*Gdx.graphics.getWidth()/10+Gdx.graphics.getWidth()/4)&&screenY<2*Gdx.graphics.getHeight()/3&&screenY>(2*Gdx.graphics.getHeight()/3-Gdx.graphics.getHeight()/10)){
+                resetPento();
+                super.reset();
+            }
+            else if(screenX>6*Gdx.graphics.getWidth()/10&&screenX<(6*Gdx.graphics.getWidth()/10+Gdx.graphics.getWidth()/4)&&screenY<5*Gdx.graphics.getHeight()/6&&screenY>(5*Gdx.graphics.getHeight()/6-Gdx.graphics.getHeight()/10)){
+                super.setPause(true);
+            }
+            else if(screenX<Gdx.graphics.getWidth()/2 && screenY>Gdx.graphics.getHeight()/4 && screenY<16*Gdx.graphics.getHeight()/17){
+                removeAim();
+                movePentominoLeft();
+                aimDrop();
+                drawAim();
+            }
+            else if(screenX>=Gdx.graphics.getWidth()/2 && screenY>Gdx.graphics.getHeight()/4 && screenY<16*Gdx.graphics.getHeight()/17){
+                removeAim();
+                movePentominoRight();
+                aimDrop();
+                drawAim();
+            }
+            if(screenY<Gdx.graphics.getHeight()/4){
+                removeAim();
+                rotate();
+                aimDrop();
+                drawAim();
+            }
+            if(screenY>16*Gdx.graphics.getHeight()/17){
+                removePosition();
+                drop();
+            }
+            return false;
         }
-        else if(screenX<Gdx.graphics.getWidth()/2 && screenY>Gdx.graphics.getHeight()/4 && screenY<16*Gdx.graphics.getHeight()/17){
-            removeAim();
-            movePentominoLeft();
-            aimDrop();
-            drawAim();
+        else {
+            if(screenX>6*Gdx.graphics.getWidth()/10&&screenX<(6*Gdx.graphics.getWidth()/10+Gdx.graphics.getWidth()/4)&&screenY<2*Gdx.graphics.getHeight()/3&&screenY>(2*Gdx.graphics.getHeight()/3-Gdx.graphics.getHeight()/10)){
+                resetPento();
+                super.setPause(false);
+                super.reset();
+            }
+            else if(screenX>6*Gdx.graphics.getWidth()/10&&screenX<(6*Gdx.graphics.getWidth()/10+Gdx.graphics.getWidth()/4)&&screenY<5*Gdx.graphics.getHeight()/6&&screenY>(5*Gdx.graphics.getHeight()/6-Gdx.graphics.getHeight()/10)){
+                super.setPause(false);
+            }
+            return false;
         }
-        else if(screenX>=Gdx.graphics.getWidth()/2 && screenY>Gdx.graphics.getHeight()/4 && screenY<16*Gdx.graphics.getHeight()/17){
-            removeAim();
-            movePentominoRight();
-            aimDrop();
-            drawAim();
-        }
-        if(screenY<Gdx.graphics.getHeight()/4){
-            removeAim();
-            rotate();
-            aimDrop();
-            drawAim();
-        }
-        if(screenY>16*Gdx.graphics.getHeight()/17){
-            removePosition();
-            drop();
-        }
-        return false;
     }
 
     @Override
@@ -375,9 +395,14 @@ public class Pentomino extends GameLogic implements InputProcessor {
         int fullLines=0;
         int connections=0;
         int holes=0;
-        int touchGround=0;
+        int heighestPoint=14;
+        int touchEdge=0;
+        int pentominoHeight=0;
         int currentRow=-1;
         for(int i=1;i<piece.length;i+=2){
+            pentominoHeight+=piece[i]+minimalDropHeight;
+            if(piece[i]+minimalDropHeight<heighestPoint)
+                heighestPoint=piece[i]+minimalDropHeight;
             if(piece[i]+minimalDropHeight!=currentRow) {
                 currentRow = piece[i] + minimalDropHeight;
                 cellsFull = 0;
@@ -391,8 +416,8 @@ public class Pentomino extends GameLogic implements InputProcessor {
                                 connections++;
                             if (currentRow + 1<ROWS&&board[currentRow + 1][c] == 0 || currentRow + 2<ROWS&&board[currentRow + 1][c]==-1&&board[currentRow + 2][c] == 0)
                                 holes++;
-                            if(currentRow==ROWS-1){
-                                touchGround++;
+                            if(currentRow==ROWS-1||c==0||c==COLS-1){
+                                touchEdge++;
                             }
                         }
                     } else {
@@ -404,7 +429,7 @@ public class Pentomino extends GameLogic implements InputProcessor {
                 }
             }
         }
-        int[] evalValues={fullLines,connections,holes,touchGround}; //values to evaluate Position of the Pentomino for the bot.
+        int[] evalValues={heighestPoint,pentominoHeight,fullLines,connections,holes,touchEdge}; //values to evaluate Position of the Pentomino for the bot.
         return evalValues;
     }
 
