@@ -28,12 +28,21 @@ public class Pentomino extends GameLogic implements InputProcessor {
     private int minimalDropHeight=Integer.MAX_VALUE;
 
     private static int[][] board= new int[ROWS][COLS];
+    
+    /**
+    * The constructor takes in the pieces & the rotations.
+    * @param p
+    * @param r
+    */
 
     public Pentomino(int p,int r){
         this.p=p;
         this.r=r;
         this.piece=rotations[p][r];
     }
+    /** Initialises the pentominoes & displays them on the board.
+    * @return true (boolean) if the pentominoes are initialised.
+    */
 
     public boolean initPento() {
         row=0;
@@ -70,6 +79,9 @@ public class Pentomino extends GameLogic implements InputProcessor {
         drawPentomino();
         return true;
     }
+    /** Checks whether there is any overlap between pentominoes.
+    * @return true (boolean) if any pentominoes overlap.
+    */
 
     public boolean checkOverlap(){
         for (int i = 1; i < 8; i += 2) {
@@ -78,6 +90,11 @@ public class Pentomino extends GameLogic implements InputProcessor {
         }
         return false;
     }
+    
+    /**
+    * Checks to see if a pentomino can fall (be translated) downwards.
+    * @return true (boolean) if the pentomino falls.
+    */
 
     public boolean fall(){
         if(row+1+maxRow<ROWS){
@@ -92,10 +109,17 @@ public class Pentomino extends GameLogic implements InputProcessor {
         else
             return false;
     }
+    /**
+    * Displays the board on the screen.
+    * @return int[][] (the board).
+    */
 
     public int[][] getBoard(){
         return board;
     }
+    /**
+    * Resets the game.
+    */
 
     public void resetPento(){
         board=new int[ROWS][COLS];
@@ -110,17 +134,33 @@ public class Pentomino extends GameLogic implements InputProcessor {
         rotatedPiece=new int[9];
         r=0;
     }
+    /** 
+    * Displays the pentomino on the board.
+    * @return int[] (the pentomino piece).
+    */
+    
 
     public int[] getPiece(){
         return piece;
     }
+    /**
+    * Displays the columns of the board.
+    * @return int.
+    */
 
     public int getCol(){
         return col;
     }
+    /**
+    * Gets the rotations for each pentomino.
+    * @return int.
+    */
     public int getRotation(){
         return r;
     }
+    /**
+    * Draws the pentominoes on the board.
+    */
 
     public void drawPentomino() {
         board[row][col] = piece[0];
@@ -217,6 +257,10 @@ public class Pentomino extends GameLogic implements InputProcessor {
         maxRowPerCol=temp;
         drawPentomino();
     }
+    /**
+    * Checks if the pentomino is out of bounds (outside the board).
+    * @return true (boolean) if the pentomino is out of bounds.
+    */
 
     public  boolean checkOutOfBoard(){
         for (int i = 1; i < 8; i += 2) {
@@ -229,6 +273,10 @@ public class Pentomino extends GameLogic implements InputProcessor {
         }
         return false; //it is not out of the board
     }
+    /** 
+    * Moves the pentomino left.
+    * @return true (boolean).
+    */
 
 
     public boolean movePentominoLeft(){
@@ -244,6 +292,10 @@ public class Pentomino extends GameLogic implements InputProcessor {
         drawPentomino();
         return true;
     }
+    /** 
+    * Moves the pentomino right.
+    * @return true (boolean).
+    */
 
     public boolean movePentominoRight(){
         if (row >= ROWS || //if it is below the board
